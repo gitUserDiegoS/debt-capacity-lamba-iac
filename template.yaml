@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Flujo de capacidad de endeudamiento
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: nodejs20.x
+
+Resources:
+  # Cola de entrada para solicitudes de validación
+  DebtCapacityRequestQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: debt-capacity-request-queue
+
+  # Cola de salida con las respuestas de la Lambda
+  DebtCapacityResponseQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: debt-capacity-response-queue
+
+  # Lambda para validar capacidad de endeudamiento
+  DebtCapacityValidationLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: debt-capacity-validation
+      Handler: app.handler
+      CodeUri: src/
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !Ref DebtCapacityRequestQueue
+        - SQSSendMessagePolicy:
+            QueueName: debt-capacity-response-queue
+      Environment:
+        Variables:
+          RESPONSE_QUEUE_URL: !Ref DebtCapacityResponseQueue
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt DebtCapacityRequestQueue.Arn
+            BatchSize: 1
+
+Outputs:
+  RequestQueueUrl:
+    Description: URL de la cola de solicitudes
+    Value: !Ref DebtCapacityRequestQueue
+
+  ResponseQueueUrl:
+    Description: URL de la cola de respuestas
+    Value: !Ref DebtCapacityResponseQueue

@@ -1,0 +1,11 @@
+version = 0.1
+
+[dev.deploy.parameters]
+stack_name = "debt-capacity-lambda-stack"
+resolve_s3 = true
+s3_prefix = "debt-capacity-lambda-stack"
+region = "sa-east-1"
+profile = "diegoworkforce"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
