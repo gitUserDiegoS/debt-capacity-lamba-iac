@@ -1,11 +1,14 @@
+const { info } = require("../utils/logger");
+
+
 function takeDecisition(newLoanPayment, availableCapacity, amount, salaryBase) {
-  console.log("Decision check:", {
+  info("logger Decition check: ", {
     newLoanPayment,
     availableCapacity,
     salaryBase,
     amount,
   });
-
+ 
   if (newLoanPayment > availableCapacity) {
     return "REJECTED";
   }

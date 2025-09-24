@@ -1,61 +1,23 @@
-const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
-const {
-  calculateMaxCapacity,
-  calculateAvailableCapacity,
-} = require("./services/capacityService");
-const { calculateCurrentMonthlyFee } = require("./services/debtService");
-const {
-  calculateMonthlyFee,
-  generatePaymentPlan,
-} = require("./services/quotaService");
-const { takeDecisition } = require("./services/decitionService");
+const {processAutomaticValidation} = require("./application/automaticValidation");
+const { info, error } = require("./utils/logger");
 
-const sqs = new SQSClient({ region: process.env.AWS_REGION });
-const responseQueueUrl = process.env.RESPONSE_QUEUE_URL;
-
+//Entrypoint lambda handler 
 exports.handler = async (event) => {
-  console.log("SQS event:", JSON.stringify(event));
+ 
+  info("SQS event received:", JSON.stringify(event));
 
   for (const record of event.Records) {
     try {
+
       const body = JSON.parse(record.body);
-      const { salaryBase, amount, rate, term, loans } = body;
+      await processAutomaticValidation(body);
+      info("logger Result published in SQS");
 
-      const maxCapacity = calculateMaxCapacity(salaryBase);
-      const currentDebt = calculateCurrentMonthlyFee(loans);
-      const availableCapacity = calculateAvailableCapacity(maxCapacity,currentDebt);
-      const newLoanPayment = calculateMonthlyFee(amount, rate, term);
-      const decition = takeDecisition(newLoanPayment,availableCapacity,amount,salaryBase);
-      const paymentPlan = generatePaymentPlan(amount, rate, term);
-
-      const message = {
-        decition,
-        maxCapacity: maxCapacity.toFixed(2),
-        currentDebt: currentDebt.toFixed(2),
-        availableCapacity: availableCapacity.toFixed(2),
-        newLoanPayment: newLoanPayment.toFixed(2),
-        paymentPlan: paymentPlan.map((p) => ({
-          month: p.month,
-          monthlyFee: p.monthlyFee.toFixed(2),
-          rate: p.rate.toFixed(2),
-          principalPayment: p.principalPayment.toFixed(2),
-          remininBalance: p.remininBalance.toFixed(2),
-        })),
-      };
-
-      //publish in response sqs
-      await sqs.send(
-        new SendMessageCommand({
-          QueueUrl: responseQueueUrl,
-          MessageBody: JSON.stringify(message),
-        })
-      );
-
-      console.log("Result published in SNS:", message);
     } catch (err) {
-      console.error("Error processing message:", err);
+      error("Error processing message:", err);
     }
   }
 
   return { statusCode: 200 };
+  
 };

@@ -1,5 +1,5 @@
 const { calculateMonthlyFee } = require("./quotaService");
-//calculate the monthly fee according to the loans
+//calculate the cuurent deb of loans
 function calculateCurrentMonthlyFee(loans) {
   return loans
     .map(p =>{
