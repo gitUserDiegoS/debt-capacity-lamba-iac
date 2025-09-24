@@ -1,11 +1,18 @@
 function takeDecisition(newLoanPayment, availableCapacity, amount, salaryBase) {
+  console.log("Decision check:", {
+    newLoanPayment,
+    availableCapacity,
+    salaryBase,
+    amount,
+  });
+
   if (newLoanPayment > availableCapacity) {
-    return "RECHAZADO";
+    return "REJECTED";
   }
   if (amount > salaryBase * 5) {
-    return "REVISION MANUAL";
+    return "MANUAL REVIEW";
   }
-  return "APROBADO";
+  return "APPROVED";
 }
 
 module.exports = { takeDecisition };

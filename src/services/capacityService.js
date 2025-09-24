@@ -1,9 +1,9 @@
-// Capacidad máxima = 35% ingresos
+// risk control,max capacity should not be greather than 35% of salary base
 function calculateMaxCapacity(salaryBase) {
   return salaryBase * 0.35;
 }
 
-// Capacidad disponible = máxima – deuda actual
+// calculate avalilable capacity
 function calculateAvailableCapacity(maxCapacity, actualDebt) {
   return maxCapacity - actualDebt;
 }

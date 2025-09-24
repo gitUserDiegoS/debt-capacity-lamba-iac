@@ -1,25 +1,47 @@
-// Fórmula de amortización (monthlyFee)
-function calculateMonthlyFee(P, i, n) {
-  return (P * i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+
+/**
+ * convert the annualRate in percentage to monthly decimal rate
+ * Ejemplo: 20.00 → 0.20 / 12 = 0.0167
+ */
+function toMonthlyRate(annualRatePercent) {
+
+  return (annualRatePercent / 100) / 12;
 }
 
-// Plan de pago detallado
-function generatePaymentPlan(P, i, n) {
-  let balance = P;
-  const plan = [];
-  const monthlyFee = calculateMonthlyFee(P, i, n);
 
-  for (let month = 1; month <= n; month++) {
-    const rate = balance * i;
+// calculate monthlyFee
+function calculateMonthlyFee(amount, rate, term) {
+  
+    const monthlyRate = toMonthlyRate (rate);
+
+     if (monthlyRate === 0) {
+    return amount / termMonths;
+  }
+
+  return (amount * monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1);
+}
+
+// return the payment Plan according to the term, amount and monthlyRate
+function generatePaymentPlan(amount, rate, term) {
+
+  const monthlyRate = toMonthlyRate (rate);
+  const monthlyFee = calculateMonthlyFee(amount, rate, term);
+
+
+  let balance = amount;
+  const plan = [];
+
+  for (let month = 1; month <= term; month++) {
+    const rate = balance * monthlyRate;
     const principalPayment = monthlyFee - rate;
     balance -= principalPayment;
 
     plan.push({
       month,
-      monthlyFee: monthlyFee.toFixed(2),
-      rate: rate.toFixed(2),
-      principalPayment: principalPayment.toFixed(2),
-      remininBalance: balance.toFixed(2),
+      monthlyFee: monthlyFee,
+      rate: rate,
+      principalPayment: principalPayment,
+      remininBalance: balance>0?balance:0.00,
     });
   }
 
