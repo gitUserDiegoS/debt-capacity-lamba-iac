@@ -7,13 +7,14 @@ const { publishResponse } = require("../adapters/sqsReponseAdapter");
 
 //logic orchestator 
 async function processAutomaticValidation({
+  idApplication,
   salaryBase,
   amount,
   rate,
   term,
   loans,
 }) {
-  info("Processing application", { salaryBase, amount, rate, term });
+  info("Processing application", {idApplication, salaryBase, amount, rate, term });
 
   const maxCapacity = calculateMaxCapacity(salaryBase);
   const currentDebt = calculateCurrentMonthlyFee(loans);
@@ -31,6 +32,7 @@ async function processAutomaticValidation({
   const paymentPlan = generatePaymentPlan(amount, rate, term);
 
   const message = {
+    idApplication,
     decition,
     maxCapacity: maxCapacity.toFixed(2),
     currentDebt: currentDebt.toFixed(2),
